@@ -1,7 +1,9 @@
+
 // src/lib/firebase/realtime-db.ts
 import { db } from './config';
-import { ref, set, onValue, push, serverTimestamp, off, type DataSnapshot, query, orderByChild, limitToLast } from 'firebase/database';
+import { ref, set, onValue, push, serverTimestamp, off, type DataSnapshot, query, orderByChild, limitToLast, update, get, child } from 'firebase/database';
 import type { User } from 'firebase/auth';
+import type { UserProfileData } from '@/lib/schemas/auth-schemas';
 
 export interface Message {
   id: string;
@@ -12,6 +14,7 @@ export interface Message {
 }
 
 const MESSAGES_PATH = 'messages';
+const USERS_PATH = 'users';
 
 export async function addMessage(messageText: string, user: User | null): Promise<void> {
   if (!messageText.trim()) {
@@ -19,7 +22,7 @@ export async function addMessage(messageText: string, user: User | null): Promis
   }
   try {
     const messagesRef = ref(db, MESSAGES_PATH);
-    const newMessageRef = push(messagesRef); // Generates a unique ID
+    const newMessageRef = push(messagesRef);
     
     const messageData: { text: string; timestamp: object; userId?: string; userName?: string } = {
       text: messageText,
@@ -49,17 +52,64 @@ export function subscribeToMessages(callback: (messages: Message[]) => void, mes
       const messagesList: Message[] = Object.keys(messagesData).map(key => ({
         id: key,
         ...messagesData[key]
-      })).sort((a, b) => a.timestamp - b.timestamp); // Sort by oldest first for typical chat display
+      })).sort((a, b) => a.timestamp - b.timestamp);
       callback(messagesList);
     } else {
-      callback([]); // No messages
+      callback([]);
     }
   }, (error) => {
     console.error("Error subscribing to messages:", error);
-    // Optionally, inform the user via toast or other UI element
-    callback([]); // Send empty list on error
+    callback([]);
   });
 
-  // Return an unsubscribe function
   return () => off(messagesQuery, 'value', listener);
+}
+
+export async function getUserProfileData(userId: string): Promise<UserProfileData | null> {
+  try {
+    const userProfileRef = child(ref(db, USERS_PATH), `${userId}/profile`);
+    const snapshot = await get(userProfileRef);
+    if (snapshot.exists()) {
+      return snapshot.val() as UserProfileData;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching user profile data:", error);
+    return null;
+  }
+}
+
+export async function updateUserProfileData(userId: string, data: Partial<UserProfileData>): Promise<void> {
+  try {
+    const userProfileRef = child(ref(db, USERS_PATH), `${userId}/profile`);
+    await update(userProfileRef, data);
+  } catch (error) {
+    console.error("Error updating user profile data:", error);
+    throw error;
+  }
+}
+
+export async function ensureUserProfileExists(user: User): Promise<UserProfileData> {
+  let profileData = await getUserProfileData(user.uid);
+  if (!profileData) {
+    const initialProfile: UserProfileData = {
+      displayName: user.displayName || null,
+      email: user.email || null,
+      isStoreOwner: false,
+      credits: 0,
+    };
+    await updateUserProfileData(user.uid, initialProfile);
+    return initialProfile;
+  }
+  // Ensure essential fields exist if profile was created partially
+  const updates: Partial<UserProfileData> = {};
+  if (profileData.displayName === undefined) updates.displayName = user.displayName || null;
+  if (profileData.email === undefined) updates.email = user.email || null;
+  if (profileData.isStoreOwner === undefined) updates.isStoreOwner = false;
+  if (profileData.credits === undefined) updates.credits = 0;
+  if (Object.keys(updates).length > 0) {
+    await updateUserProfileData(user.uid, updates);
+    profileData = { ...profileData, ...updates };
+  }
+  return profileData;
 }

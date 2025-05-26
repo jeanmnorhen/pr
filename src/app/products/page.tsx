@@ -4,11 +4,12 @@
 import type { ReactNode, ChangeEvent } from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  ShoppingCart, Loader2, AlertTriangle, Search, XCircle,
+  ShoppingCart, Loader2, AlertTriangle, Search, XCircle, Store,
   Laptop, Smartphone, Headphones, Watch, TabletIcon as Tablet, Camera, Gamepad2, Mouse, Keyboard, Monitor
 } from 'lucide-react';
 import type { LucideProps } from 'lucide-react';
@@ -21,11 +22,13 @@ interface Product {
   category: string;
   imageUrl: string;
   'data-ai-hint'?: string;
+  storeOwnerId: string;
+  storeOwnerName: string;
 }
 
 interface CategoryFilter {
   name: string;
-  originalName: string; // Nome usado para filtrar na API
+  originalName: string; 
   icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
 }
 
@@ -53,7 +56,7 @@ export default function ProductsPage(): ReactNode {
   useEffect(() => {
     const timerId = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 500); // 500ms debounce
+    }, 500);
 
     return () => {
       clearTimeout(timerId);
@@ -124,17 +127,16 @@ export default function ProductsPage(): ReactNode {
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl sm:text-4xl font-extrabold mb-6 sm:mb-8 text-center text-primary tracking-tight">
-        Explore Nossos Produtos
+        Buscar Anúncios de Produtos
       </h1>
 
-      {/* Search and Filters */}
       <div className="mb-8 p-4 sm:p-6 bg-card shadow-lg rounded-xl border border-border">
         <div className="flex flex-col sm:flex-row gap-4 mb-6 items-center">
           <div className="relative w-full sm:flex-grow">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Buscar produtos..."
+              placeholder="Buscar produtos ou lojas..."
               value={searchTerm}
               onChange={handleSearchChange}
               className="pl-10 pr-4 py-2 w-full h-11 text-base"
@@ -170,7 +172,6 @@ export default function ProductsPage(): ReactNode {
         </div>
       </div>
 
-      {/* Product Listing Area */}
       {loading ? (
         <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-4 sm:p-6">
           <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
@@ -217,17 +218,29 @@ export default function ProductsPage(): ReactNode {
                   {product.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow flex flex-col justify-end pt-2 px-4 pb-4">
+              <CardContent className="flex-grow flex flex-col justify-between pt-2 px-4 pb-4">
                 <div>
-                  <p className="text-xl sm:text-2xl font-semibold text-primary mb-3 sm:mb-4">
+                  <p className="text-xl sm:text-2xl font-semibold text-primary mb-2 sm:mb-3">
                     R$ {product.price.toFixed(2).replace('.', ',')}
                   </p>
+                   <p className="text-xs text-muted-foreground mb-3 sm:mb-4">
+                    Vendido por: <span className="font-medium text-foreground">{product.storeOwnerName}</span>
+                  </p>
                 </div>
-                <Button className="w-full bg-accent hover:bg-accent/80 text-accent-foreground font-semibold py-2.5 sm:py-3 text-sm sm:text-base rounded-md shadow-md hover:shadow-lg transition-all duration-300">
-                  <ShoppingCart size={18} className="mr-2" />
-                  Adicionar ao Carrinho
+                <Button asChild variant="outline" size="sm" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300">
+                  <Link href={`/store/${product.storeOwnerId}`}>
+                    <Store size={16} className="mr-2" />
+                    Ver Loja
+                  </Link>
                 </Button>
               </CardContent>
+              {/* <CardFooter className="p-4 pt-0"> 
+                // Placeholder for Add to Cart or other actions
+                 <Button className="w-full bg-accent hover:bg-accent/80 text-accent-foreground font-semibold py-2.5 sm:py-3 text-sm sm:text-base rounded-md shadow-md hover:shadow-lg transition-all duration-300">
+                  <ShoppingCart size={18} className="mr-2" />
+                  Adicionar ao Carrinho
+                </Button> 
+              </CardFooter> */}
             </Card>
           ))}
         </div>
@@ -235,4 +248,3 @@ export default function ProductsPage(): ReactNode {
     </div>
   );
 }
-

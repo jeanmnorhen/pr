@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export const LoginSchema = z.object({
@@ -26,3 +27,11 @@ export const ProfileUpdateSchema = z.object({
   displayName: z.string().min(2, { message: 'Display name must be at least 2 characters' }),
 });
 export type ProfileUpdateFormData = z.infer<typeof ProfileUpdateSchema>;
+
+// User Profile Data stored in Realtime Database
+export interface UserProfileData {
+  displayName?: string | null;
+  email?: string | null;
+  isStoreOwner?: boolean;
+  credits?: number;
+}
