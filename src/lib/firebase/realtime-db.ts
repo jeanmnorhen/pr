@@ -3,7 +3,7 @@
 import { db } from './config';
 import { ref, set, onValue, push, serverTimestamp, off, type DataSnapshot, query, orderByChild, limitToLast, update, get, child } from 'firebase/database';
 import type { User } from 'firebase/auth';
-import type { UserProfileData } from '@/lib/schemas/auth-schemas';
+import type { UserProfileData, ProductAd, ProductAdFormData } from '@/lib/schemas/auth-schemas';
 
 export interface Message {
   id: string;
@@ -15,6 +15,7 @@ export interface Message {
 
 const MESSAGES_PATH = 'messages';
 const USERS_PATH = 'users';
+const STORE_PRODUCTS_PATH = 'storeProducts';
 
 export async function addMessage(messageText: string, user: User | null): Promise<void> {
   if (!messageText.trim()) {
@@ -112,4 +113,50 @@ export async function ensureUserProfileExists(user: User): Promise<UserProfileDa
     profileData = { ...profileData, ...updates };
   }
   return profileData;
+}
+
+export async function addProductAd(
+  userId: string,
+  storeOwnerName: string,
+  productData: ProductAdFormData
+): Promise<string> {
+  try {
+    const userProductsRef = ref(db, `${STORE_PRODUCTS_PATH}/${userId}`);
+    const newProductRef = push(userProductsRef);
+    const newProductId = newProductRef.key;
+    if (!newProductId) {
+      throw new Error("Failed to generate new product ID.");
+    }
+
+    const fullProductData: Omit<ProductAd, 'id'> = {
+      ...productData,
+      storeOwnerId: userId,
+      storeOwnerName: storeOwnerName,
+      timestamp: serverTimestamp() as any, // Cast to any because RTDB expects an object
+    };
+    await set(newProductRef, fullProductData);
+    return newProductId;
+  } catch (error) {
+    console.error("Error adding product ad to Realtime Database:", error);
+    throw error;
+  }
+}
+
+export async function getStoreProducts(storeId: string): Promise<ProductAd[]> {
+  try {
+    const storeProductsRef = query(ref(db, `${STORE_PRODUCTS_PATH}/${storeId}`), orderByChild('timestamp'));
+    const snapshot = await get(storeProductsRef);
+    if (snapshot.exists()) {
+      const productsData = snapshot.val();
+      const productsList: ProductAd[] = Object.keys(productsData).map(key => ({
+        id: key,
+        ...productsData[key]
+      })).sort((a, b) => b.timestamp - a.timestamp); // Show newest first
+      return productsList;
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching store products:", error);
+    return [];
+  }
 }

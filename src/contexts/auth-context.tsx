@@ -16,8 +16,8 @@ import {
 import { auth } from '@/lib/firebase/config';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import type { LoginFormData, RegisterFormData, ProfileUpdateFormData, ForgotPasswordFormData, UserProfileData } from '@/lib/schemas/auth-schemas';
-import { getUserProfileData, updateUserProfileData, ensureUserProfileExists } from '@/lib/firebase/realtime-db';
+import type { LoginFormData, RegisterFormData, ProfileUpdateFormData, ForgotPasswordFormData, UserProfileData, ProductAdFormData } from '@/lib/schemas/auth-schemas';
+import { getUserProfileData, updateUserProfileData, ensureUserProfileExists, addProductAd as dbAddProductAd } from '@/lib/firebase/realtime-db';
 
 export interface AppUser extends FirebaseUser, UserProfileData {}
 
@@ -32,6 +32,7 @@ interface AuthContextType {
   updateUserDisplayNameAuth: (data: ProfileUpdateFormData) => Promise<void>;
   becomeStoreOwner: () => Promise<void>;
   addTestCredits: (amount: number) => Promise<void>;
+  postProductAd: (formData: ProductAdFormData) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -210,6 +211,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
+  const postProductAd = async (formData: ProductAdFormData): Promise<boolean> => {
+    if (!user || !user.isStoreOwner) {
+      toast({ title: 'Erro', description: 'Você precisa ser um lojista para postar anúncios.', variant: 'destructive' });
+      return false;
+    }
+
+    const currentCredits = user.credits || 0;
+    let requiredCredits = 0;
+    if (formData.adType === 'offer') {
+      requiredCredits = 1;
+    } else if (formData.adType === 'promotion') {
+      requiredCredits = 2;
+    }
+
+    if (requiredCredits > 0 && currentCredits < requiredCredits) {
+      toast({ title: 'Créditos Insuficientes', description: `Você precisa de ${requiredCredits} crédito(s) para um anúncio '${formData.adType}', mas possui ${currentCredits}.`, variant: 'destructive' });
+      return false;
+    }
+    
+    // TODO: Implement actual credit deduction here in a future step.
+    // For now, we only check. If successful, could potentially deduct:
+    // const newCredits = currentCredits - requiredCredits;
+    // await updateUserProfileData(user.uid, { credits: newCredits });
+    // setUser(prev => prev ? { ...prev, credits: newCredits } : null);
+
+
+    setLoading(true);
+    try {
+      await dbAddProductAd(user.uid, user.displayName || user.email || 'Lojista Anônimo', formData);
+      toast({ title: 'Sucesso!', description: 'Seu anúncio de produto foi postado.' });
+      return true;
+    } catch (err) {
+      handleAuthError(err, 'Falha ao postar anúncio.');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const value = {
     user,
@@ -222,6 +261,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     updateUserDisplayNameAuth,
     becomeStoreOwner,
     addTestCredits,
+    postProductAd,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

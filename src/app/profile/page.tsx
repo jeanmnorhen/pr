@@ -3,9 +3,10 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { UserCircle, Mail, Edit3, Store, CreditCard, Coins } from 'lucide-react';
+import { UserCircle, Mail, Edit3, Store, CreditCard, Coins, PlusCircle } from 'lucide-react';
 
 import { useAuth } from "@/hooks/use-auth";
 import { Spinner } from "@/components/ui/spinner";
@@ -114,11 +115,18 @@ export default function ProfilePage() {
 
           <Separator />
           
-          <div className="space-y-2">
+          <div className="space-y-4">
              <h3 className="text-lg font-semibold flex items-center gap-2"><Store size={18} /> Loja</h3>
             {user.isStoreOwner ? (
-              <p className="text-green-600 font-medium">Você é um lojista!</p>
-              // TODO: Link para gerenciar loja/anúncios
+              <>
+                <p className="text-green-600 font-medium">Você é um lojista!</p>
+                <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white">
+                  <Link href="/profile/create-ad">
+                    <PlusCircle size={18} className="mr-2" />
+                    Postar Novo Anúncio
+                  </Link>
+                </Button>
+              </>
             ) : (
               <>
                 <p className="text-muted-foreground">Torne-se um lojista para anunciar seus produtos.</p>
