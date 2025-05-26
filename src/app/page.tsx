@@ -21,7 +21,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center p-6">
       <ShieldCheck className="w-24 h-24 text-primary mb-6" />
-      <h1 className="text-4xl font-bold mb-4 text-primary">Welcome to AuthFlow</h1>
+      <h1 className="text-4xl font-bold mb-4 text-primary">Preço Real</h1>
       <p className="text-lg text-muted-foreground mb-8 max-w-xl">
         Securely manage your authentication with Firebase and Next.js. 
         This application demonstrates user registration, login, profile management, and password recovery.
