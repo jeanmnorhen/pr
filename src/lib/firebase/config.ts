@@ -5,14 +5,15 @@ import { getAuth, type Auth } from 'firebase/auth';
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 // IMPORTANT: Replace with your actual Firebase project configuration
 // It's highly recommended to use environment variables for this sensitive information.
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  // measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, // Optional
+  apiKey: "AIzaSyDfDN7WxXp7aO_GzMKtmHoRtlH47AA9aP4",
+  authDomain: "precoreal-1554a.firebaseapp.com",
+  projectId: "precoreal-1554a",
+  storageBucket: "precoreal-1554a.firebasestorage.app",
+  messagingSenderId: "510210246979",
+  appId: "1:510210246979:web:0baa092b62b422841287f6",
+  measurementId: "G-XXTGSVMQQE"
 };
 
 // --- ADDED FOR DIAGNOSIS ---
