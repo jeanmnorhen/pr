@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'AuthFlow - Firebase Authentication with Next.js',
+  title: 'Preço Real - Firebase Authentication with Next.js',
   description: 'Seamless Firebase authentication integration in a Next.js application.',
 };
 

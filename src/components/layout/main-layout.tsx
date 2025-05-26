@@ -13,7 +13,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         {children}
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t border-border">
-        AuthFlow &copy; {new Date().getFullYear()}
+        Preço Real &copy; {new Date().getFullYear()}
       </footer>
     </div>
   );

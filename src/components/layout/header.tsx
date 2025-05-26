@@ -20,7 +20,7 @@ export default function Header() {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
           <ShieldCheck className="h-7 w-7" />
-          <h1 className="text-xl font-semibold">AuthFlow</h1>
+          <h1 className="text-xl font-semibold">Preço Real</h1>
         </Link>
         <nav className="flex items-center gap-2 sm:gap-4">
           <Button variant="ghost" size="sm" asChild>
