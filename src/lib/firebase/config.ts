@@ -1,5 +1,5 @@
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -14,6 +14,24 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   // measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, // Optional
 };
+
+// --- ADDED FOR DIAGNOSIS ---
+console.log("Attempting to initialize Firebase with the following config:");
+console.log("API Key Loaded:", firebaseConfig.apiKey ? "Set (value not logged for security)" : "MISSING or undefined");
+console.log("Auth Domain Loaded:", firebaseConfig.authDomain || "MISSING or undefined");
+console.log("Project ID Loaded:", firebaseConfig.projectId || "MISSING or undefined");
+console.log("Storage Bucket Loaded:", firebaseConfig.storageBucket || "MISSING or undefined");
+console.log("Messaging Sender ID Loaded:", firebaseConfig.messagingSenderId || "MISSING or undefined");
+console.log("App ID Loaded:", firebaseConfig.appId || "MISSING or undefined");
+
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+  console.error(
+    "Critical Firebase configuration is missing (apiKey, authDomain, or projectId). " +
+    "Please ensure your .env.local file is correctly set up with all NEXT_PUBLIC_FIREBASE_ variables " +
+    "and that you have restarted your development server."
+  );
+}
+// --- END ADDED FOR DIAGNOSIS ---
 
 // Initialize Firebase
 let app: FirebaseApp;
