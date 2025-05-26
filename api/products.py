@@ -10,7 +10,7 @@ class handler(BaseHTTPRequestHandler):
         # Roteamento simples baseado no caminho
         if self.path == '/api/products' or self.path.startswith('/api/products?'):
             products = []
-            product_names = ["Laptop Gamer", "Smartphone Pro", "Fone Bluetooth", "Smartwatch X", "Tablet 10", "Câmera 4K", "Console NextGen", "Mouse Ergonômico", "Teclado Mecânico", "Monitor Ultrawide"]
+            product_names_bases = ["Laptop Gamer", "Smartphone Pro", "Fone Bluetooth", "Smartwatch X", "Tablet 10", "Câmera 4K", "Console NextGen", "Mouse Ergonômico", "Teclado Mecânico", "Monitor Ultrawide"]
             descriptions = [
                 "Desempenho incrível para jogos e trabalho.",
                 "Câmera de alta resolução e bateria duradoura.",
@@ -36,14 +36,11 @@ class handler(BaseHTTPRequestHandler):
                 "Monitor Ultrawide": "ultrawide monitor"
             }
 
-
             for i in range(10):
-                chosen_product_name_base = random.choice(product_names)
+                chosen_product_name_base = random.choice(product_names_bases)
                 variant_number = random.randint(1, 100)
                 product_name_full = f"{chosen_product_name_base} #{variant_number}"
                 
-                # Gerar nome para URL do placeholder e data-ai-hint
-                placeholder_text = chosen_product_name_base.replace(' ', '+')
                 ai_hint_keywords = image_keywords.get(chosen_product_name_base, "product item")
 
                 products.append({
@@ -51,13 +48,12 @@ class handler(BaseHTTPRequestHandler):
                     "name": product_name_full,
                     "price": round(random.uniform(50.0, 3500.0), 2),
                     "description": random.choice(descriptions),
-                    "imageUrl": f"https://placehold.co/400x300.png?text={placeholder_text}",
+                    "imageUrl": "https://placehold.co/400x300.png", # Removed text query parameter
                     "data-ai-hint": ai_hint_keywords
                 })
 
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
-            # CORS é geralmente tratado pela Vercel em produção, mas útil para vercel dev
             self.send_header('Access-Control-Allow-Origin', '*') 
             self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
             self.send_header('Access-Control-Allow-Headers', 'Content-Type')
@@ -73,10 +69,8 @@ class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(204) # No Content
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS') # Métodos permitidos
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type') # Headers permitidos
-        self.send_header('Access-Control-Max-Age', '86400') # Cache da preflight request por 1 dia
+        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Max-Age', '86400') 
         self.end_headers()
         return
-
-    

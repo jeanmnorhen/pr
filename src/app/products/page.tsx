@@ -27,13 +27,16 @@ export default function ProductsPage(): ReactNode {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('/api/products');
+        // Em um ambiente Vercel, a API estará disponível no mesmo domínio.
+        // Para 'vercel dev', isso também deve funcionar.
+        const response = await fetch('/api/products'); 
         if (!response.ok) {
           let errorText = `Error ${response.status}`;
           try {
             const errorData = await response.json();
             errorText = `${errorText}: ${errorData.error || response.statusText}`;
           } catch (e) {
+            // Se o corpo do erro não for JSON, use o statusText
             errorText = `${errorText}: ${response.statusText}`;
           }
           throw new Error(errorText);
@@ -128,5 +131,3 @@ export default function ProductsPage(): ReactNode {
     </div>
   );
 }
-
-    
