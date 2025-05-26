@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShieldCheck, LogOut, UserCircle, LogInIcon, UserPlus } from 'lucide-react';
+import { ShieldCheck, LogOut, UserCircle, LogInIcon, UserPlus, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -22,12 +22,17 @@ export default function Header() {
           <ShieldCheck className="h-7 w-7" />
           <h1 className="text-xl font-semibold">Preço Real</h1>
         </Link>
-        <nav className="flex items-center gap-2 sm:gap-4">
+        <nav className="flex items-center gap-1 sm:gap-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/">Home</Link>
           </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/rtdb-example" className="flex items-center gap-1">
+               <MessageSquare size={18} /> Chat
+            </Link>
+          </Button>
           {loading ? (
-            <div className="h-8 w-20 bg-muted rounded-md animate-pulse"></div>
+            <div className="h-8 w-20 bg-muted rounded-md animate-pulse hidden sm:block"></div>
           ) : user ? (
             <>
               <Button variant="ghost" size="sm" asChild>
@@ -36,7 +41,8 @@ export default function Header() {
                 </Link>
               </Button>
               <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-1">
-                <LogOut size={16} /> Logout
+                <LogOut size={16} /> 
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </>
           ) : (
@@ -48,7 +54,8 @@ export default function Header() {
               </Button>
               <Button variant="default" size="sm" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
                 <Link href="/register" className="flex items-center gap-1">
-                  <UserPlus size={18} /> Register
+                  <UserPlus size={18} /> 
+                  <span className="hidden sm:inline">Register</span>
                 </Link>
               </Button>
             </>

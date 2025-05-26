@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
+import { getDatabase, type Database } from 'firebase/database'; // Added
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -43,8 +44,9 @@ if (!getApps().length) {
 }
 
 const auth: Auth = getAuth(app);
+const db: Database = getDatabase(app); // Added database instance
 
-export { app, auth };
+export { app, auth, db }; // Exported db
 
 /*
 Reminder: Create a .env.local file in the root of your project and add your Firebase config:
