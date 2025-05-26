@@ -5,11 +5,12 @@ import type { ReactNode, ChangeEvent } from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge'; // Import Badge
 import { 
-  ShoppingCart, Loader2, AlertTriangle, Search, XCircle, Store,
+  ShoppingCart, Loader2, AlertTriangle, Search, XCircle, Store, Tag, Sparkles,
   Laptop, Smartphone, Headphones, Watch, TabletIcon as Tablet, Camera, Gamepad2, Mouse, Keyboard, Monitor
 } from 'lucide-react';
 import type { LucideProps } from 'lucide-react';
@@ -24,6 +25,7 @@ interface Product {
   'data-ai-hint'?: string;
   storeOwnerId: string;
   storeOwnerName: string;
+  adType?: 'offer' | 'promotion' | null; // Added adType
 }
 
 interface CategoryFilter {
@@ -124,6 +126,24 @@ export default function ProductsPage(): ReactNode {
   
   const hasActiveFilters = searchTerm !== '' || selectedCategory !== null;
 
+  const getAdTypeBadge = (adType: Product['adType']) => {
+    if (adType === 'offer') {
+      return (
+        <Badge variant="default" className="absolute top-2 right-2 bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1">
+          <Tag size={14} className="mr-1" /> Oferta
+        </Badge>
+      );
+    }
+    if (adType === 'promotion') {
+      return (
+        <Badge variant="default" className="absolute top-2 right-2 bg-orange-500 hover:bg-orange-600 text-white text-xs px-2 py-1">
+          <Sparkles size={14} className="mr-1" /> Promoção
+        </Badge>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl sm:text-4xl font-extrabold mb-6 sm:mb-8 text-center text-primary tracking-tight">
@@ -197,7 +217,8 @@ export default function ProductsPage(): ReactNode {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-6 sm:gap-y-8">
           {products.map((product, index) => (
-            <Card key={product.id} className="flex flex-col overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out rounded-xl border-border hover:border-primary/50">
+            <Card key={product.id} className="flex flex-col overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out rounded-xl border-border hover:border-primary/50 relative">
+              {getAdTypeBadge(product.adType)}
               <div className="relative w-full h-48 sm:h-56 group">
                 <Image
                   src={product.imageUrl}
@@ -234,13 +255,6 @@ export default function ProductsPage(): ReactNode {
                   </Link>
                 </Button>
               </CardContent>
-              {/* <CardFooter className="p-4 pt-0"> 
-                // Placeholder for Add to Cart or other actions
-                 <Button className="w-full bg-accent hover:bg-accent/80 text-accent-foreground font-semibold py-2.5 sm:py-3 text-sm sm:text-base rounded-md shadow-md hover:shadow-lg transition-all duration-300">
-                  <ShoppingCart size={18} className="mr-2" />
-                  Adicionar ao Carrinho
-                </Button> 
-              </CardFooter> */}
             </Card>
           ))}
         </div>
@@ -248,3 +262,5 @@ export default function ProductsPage(): ReactNode {
     </div>
   );
 }
+
+    

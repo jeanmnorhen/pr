@@ -48,6 +48,8 @@ class handler(BaseHTTPRequestHandler):
             {"id": "store_005", "name": "Digital World"}
         ]
 
+        ad_types = [None, "offer", "promotion"] # None for standard listing
+
         for i in range(20): # Gerar uma base maior para melhor filtragem
             chosen_product_name_base = random.choice(product_names_bases)
             variant_number = random.randint(1, 100)
@@ -55,6 +57,7 @@ class handler(BaseHTTPRequestHandler):
             
             ai_hint_keywords = image_keywords.get(chosen_product_name_base, "product item")
             store_owner = random.choice(store_owners_data)
+            ad_type = random.choice(ad_types)
 
             products_base.append({
                 "id": str(i + 1),
@@ -62,10 +65,11 @@ class handler(BaseHTTPRequestHandler):
                 "price": round(random.uniform(50.0, 3500.0), 2),
                 "description": random.choice(descriptions),
                 "category": chosen_product_name_base,
-                "imageUrl": f"https://placehold.co/600x400.png?a={random.randint(1,1000)}", # Forçar imagem diferente
+                "imageUrl": f"https://placehold.co/600x400.png?a={random.randint(1,1000)}",
                 "data-ai-hint": ai_hint_keywords,
                 "storeOwnerId": store_owner["id"],
-                "storeOwnerName": store_owner["name"]
+                "storeOwnerName": store_owner["name"],
+                "adType": ad_type
             })
 
         filtered_products = products_base
@@ -81,7 +85,17 @@ class handler(BaseHTTPRequestHandler):
                 search_lower in p['storeOwnerName'].lower()
             ]
         
-        final_products = filtered_products[:10] # Limitar a 10 produtos
+        # Simulate ad priority: promotions first, then offers, then standard
+        def sort_key(product):
+            if product.get("adType") == "promotion":
+                return 0
+            if product.get("adType") == "offer":
+                return 1
+            return 2
+            
+        filtered_products.sort(key=sort_key)
+        
+        final_products = filtered_products[:10]
 
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
@@ -100,3 +114,5 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Max-Age', '86400') 
         self.end_headers()
         return
+
+    
