@@ -27,8 +27,6 @@ export default function ProductsPage(): ReactNode {
       try {
         setLoading(true);
         setError(null);
-        // Em um ambiente Vercel, a API estará disponível no mesmo domínio.
-        // Para 'vercel dev', isso também deve funcionar.
         const response = await fetch('/api/products'); 
         if (!response.ok) {
           let errorText = `Error ${response.status}`;
@@ -36,7 +34,7 @@ export default function ProductsPage(): ReactNode {
             const errorData = await response.json();
             errorText = `${errorText}: ${errorData.error || response.statusText}`;
           } catch (e) {
-            // Se o corpo do erro não for JSON, use o statusText
+            // If parsing error JSON fails, use the original statusText
             errorText = `${errorText}: ${response.statusText}`;
           }
           throw new Error(errorText);
@@ -56,7 +54,7 @@ export default function ProductsPage(): ReactNode {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-280px)] text-center p-6">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-280px)] text-center p-4 sm:p-6">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
         <p className="text-lg text-muted-foreground">Carregando produtos...</p>
       </div>
@@ -65,10 +63,10 @@ export default function ProductsPage(): ReactNode {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-280px)] text-center p-6 bg-destructive/10 rounded-lg shadow-md">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-280px)] text-center p-4 sm:p-6 bg-destructive/10 rounded-lg shadow-md">
         <AlertTriangle className="h-16 w-16 text-destructive mb-4" />
-        <h1 className="text-2xl font-bold text-destructive mb-2">Oops! Algo deu errado.</h1>
-        <p className="text-destructive/80 mb-6">{error}</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-destructive mb-2">Oops! Algo deu errado.</h1>
+        <p className="text-destructive/80 mb-6 text-sm sm:text-base">{error}</p>
         <Button onClick={() => window.location.reload()} variant="destructive" className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
           Tentar Novamente
         </Button>
@@ -78,23 +76,23 @@ export default function ProductsPage(): ReactNode {
 
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-280px)] text-center p-6">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-280px)] text-center p-4 sm:p-6">
         <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4" />
-        <h1 className="text-2xl font-bold mb-4">Nenhum produto encontrado.</h1>
-        <p className="text-muted-foreground">Parece que não há produtos disponíveis no momento. Volte mais tarde!</p>
+        <h1 className="text-xl sm:text-2xl font-bold mb-4">Nenhum produto encontrado.</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">Parece que não há produtos disponíveis no momento. Volte mais tarde!</p>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-4xl font-extrabold mb-10 text-center text-primary tracking-tight">
+      <h1 className="text-3xl sm:text-4xl font-extrabold mb-8 sm:mb-10 text-center text-primary tracking-tight">
         Conheça Nossos Produtos
       </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-8">
-        {products.map((product) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-6 sm:gap-y-8">
+        {products.map((product, index) => (
           <Card key={product.id} className="flex flex-col overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out rounded-xl border-border hover:border-primary/50">
-            <div className="relative w-full h-56 group">
+            <div className="relative w-full h-48 sm:h-56 group">
               <Image
                 src={product.imageUrl}
                 alt={product.name}
@@ -103,25 +101,25 @@ export default function ProductsPage(): ReactNode {
                 style={{ objectFit: 'cover' }}
                 className="rounded-t-xl transition-transform duration-500 ease-in-out group-hover:scale-105"
                 data-ai-hint={product['data-ai-hint'] || 'product image'}
-                priority={products.indexOf(product) < 4} // Prioritize loading for first few images
+                priority={index < 4} 
               />
             </div>
-            <CardHeader className="pb-3 pt-4">
-              <CardTitle className="text-xl font-bold truncate text-foreground" title={product.name}>
+            <CardHeader className="pb-3 pt-4 px-4">
+              <CardTitle className="text-lg sm:text-xl font-bold truncate text-foreground" title={product.name}>
                 {product.name}
               </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground h-12 overflow-hidden text-ellipsis leading-relaxed">
+              <CardDescription className="text-xs sm:text-sm text-muted-foreground h-10 sm:h-12 overflow-hidden text-ellipsis leading-relaxed">
                 {product.description}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow flex flex-col justify-end pt-2">
+            <CardContent className="flex-grow flex flex-col justify-end pt-2 px-4 pb-4">
               <div>
-                <p className="text-2xl font-semibold text-primary mb-4">
+                <p className="text-xl sm:text-2xl font-semibold text-primary mb-3 sm:mb-4">
                   R$ {product.price.toFixed(2).replace('.', ',')}
                 </p>
               </div>
-              <Button className="w-full bg-accent hover:bg-accent/80 text-accent-foreground font-semibold py-3 text-base rounded-md shadow-md hover:shadow-lg transition-all duration-300">
-                <ShoppingCart size={20} className="mr-2" />
+              <Button className="w-full bg-accent hover:bg-accent/80 text-accent-foreground font-semibold py-2.5 sm:py-3 text-sm sm:text-base rounded-md shadow-md hover:shadow-lg transition-all duration-300">
+                <ShoppingCart size={18} className="mr-2" />
                 Adicionar ao Carrinho
               </Button>
             </CardContent>

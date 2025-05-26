@@ -54,19 +54,19 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-12 px-4">
+    <div className="max-w-2xl mx-auto py-8 sm:py-12 px-4">
       <Card className="shadow-xl">
         <CardHeader className="text-center">
-          <UserCircle className="mx-auto h-20 w-20 text-primary mb-4" />
-          <CardTitle className="text-3xl font-bold">Your Profile</CardTitle>
-          <CardDescription>Manage your account information.</CardDescription>
+          <UserCircle className="mx-auto h-16 w-16 sm:h-20 sm:w-20 text-primary mb-4" />
+          <CardTitle className="text-2xl sm:text-3xl font-bold">Seu Perfil</CardTitle>
+          <CardDescription>Gerencie as informações da sua conta.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <h3 className="text-lg font-semibold flex items-center gap-2"><Mail size={18} /> Email</h3>
-            <p className="text-muted-foreground bg-muted p-3 rounded-md">{user.email}</p>
+            <p className="text-muted-foreground bg-muted p-3 rounded-md break-all">{user.email}</p>
             {user.emailVerified === false && (
-                <p className="text-sm text-yellow-600">Your email is not verified.</p>
+                <p className="text-sm text-yellow-600">Seu email não foi verificado.</p>
             )}
           </div>
           
@@ -77,9 +77,9 @@ export default function ProfilePage() {
                 name="displayName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2"><Edit3 size={18} /> Display Name</FormLabel>
+                    <FormLabel className="flex items-center gap-2"><Edit3 size={18} /> Nome de Exibição</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your display name" {...field} />
+                      <Input placeholder="Seu nome de exibição" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -87,14 +87,14 @@ export default function ProfilePage() {
               />
               <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={form.formState.isSubmitting || loading}>
                 {form.formState.isSubmitting || loading ? <Spinner size="sm" className="mr-2" /> : null}
-                Update Display Name
+                Atualizar Nome de Exibição
               </Button>
             </form>
           </Form>
 
           <Button variant="destructive" onClick={logout} className="w-full mt-6" disabled={loading}>
              {loading ? <Spinner size="sm" className="mr-2" /> : null}
-            Log Out
+            Sair
           </Button>
         </CardContent>
       </Card>
