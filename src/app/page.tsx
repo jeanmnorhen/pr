@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import { ShieldCheck, LogIn, UserPlus, UserCircle, MapPin } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
-import useGeolocation, { type GeolocationError as GeoErrorType, type GeolocationCoordinates } from '@/hooks/use-geolocation'; // Importar o hook
+import useGeolocation, { type SimpleGeolocationError, type GeolocationCoordinates } from '@/hooks/use-geolocation'; // Atualizado para SimpleGeolocationError
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function HomePage() {
@@ -39,7 +39,7 @@ export default function HomePage() {
         Gerencie sua autenticação de forma segura com Firebase e Next.js.
         Esta aplicação demonstra registro de usuário, login, gerenciamento de perfil e recuperação de senha.
       </p>
-      <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 w-full sm:w-auto">
         {user ? (
           <Button asChild size="lg" className="w-full sm:w-auto">
             <Link href="/profile" className="flex items-center justify-center gap-2">
@@ -82,7 +82,7 @@ export default function HomePage() {
           )}
           {geoError && (
             <p className="text-destructive text-sm mt-2">
-              Erro: {typeof geoError === 'string' ? geoError : (geoError as GeoErrorType).message}
+              Erro: {geoError.message}{geoError.code !== 0 ? ` (Código: ${geoError.code})` : ''}
             </p>
           )}
         </CardContent>

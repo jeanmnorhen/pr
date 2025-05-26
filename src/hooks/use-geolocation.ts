@@ -13,23 +13,18 @@ export interface GeolocationCoordinates {
   speed?: number | null;
 }
 
-export interface GeolocationPosition {
-  coords: GeolocationCoordinates;
-  timestamp: number;
-}
+// GeolocationPosition e GeolocationPositionError são tipos globais do DOM, não precisam ser redefinidos.
 
-export interface GeolocationError {
-  code: number;
+// Estrutura simplificada para o erro no estado do hook
+export interface SimpleGeolocationError {
+  code: number; // Usaremos 0 para erros customizados/não padrão
   message: string;
-  PERMISSION_DENIED: number;
-  POSITION_UNAVAILABLE: number;
-  TIMEOUT: number;
 }
 
 interface UseGeolocationState {
   loading: boolean;
   coordinates: GeolocationCoordinates | null;
-  error: GeolocationError | string | null; // Pode ser string para erros customizados
+  error: SimpleGeolocationError | null;
 }
 
 interface UseGeolocationOptions {
@@ -50,7 +45,7 @@ const useGeolocation = (options?: UseGeolocationOptions) => {
       setState({
         loading: false,
         coordinates: null,
-        error: 'Geolocalização não é suportada por este navegador ou o contexto não é seguro (HTTPS).',
+        error: { code: 0, message: 'Geolocalização não é suportada por este navegador ou o contexto não é seguro (HTTPS).' },
       });
       return;
     }
@@ -65,26 +60,33 @@ const useGeolocation = (options?: UseGeolocationOptions) => {
       });
     };
 
-    const handleError = (error: GeolocationError) => {
-      let errorMessage = error.message;
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          errorMessage = "Permissão para acessar a localização foi negada.";
+    const handleError = (geoError: GeolocationPositionError) => {
+      let message = geoError.message;
+      // Códigos de erro padrão da API de Geolocalização
+      const PERMISSION_DENIED_CODE = 1;
+      const POSITION_UNAVAILABLE_CODE = 2;
+      const TIMEOUT_CODE = 3;
+
+      switch (geoError.code) {
+        case PERMISSION_DENIED_CODE:
+          message = "Permissão para acessar a localização foi negada.";
           break;
-        case error.POSITION_UNAVAILABLE:
-          errorMessage = "Informação de localização não está disponível.";
+        case POSITION_UNAVAILABLE_CODE:
+          message = "Informação de localização não está disponível.";
           break;
-        case error.TIMEOUT:
-          errorMessage = "A requisição para obter a localização expirou.";
+        case TIMEOUT_CODE:
+          message = "A requisição para obter a localização expirou.";
           break;
+        // Não é necessário um default se usarmos geoError.message como fallback,
+        // mas podemos manter um para clareza se a mensagem original não for boa.
         default:
-          errorMessage = "Ocorreu um erro desconhecido ao obter a localização.";
+          message = `Ocorreu um erro desconhecido ao obter a localização (Código: ${geoError.code}).`;
           break;
       }
       setState({
         loading: false,
         coordinates: null,
-        error: { ...error, message: errorMessage },
+        error: { code: geoError.code, message },
       });
     };
 
