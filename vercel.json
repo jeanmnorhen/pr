@@ -1,0 +1,16 @@
+
+{
+  "functions": {
+    "api/products.py": {
+      "runtime": "python3.9"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/products",
+      "destination": "/api/products.py"
+    }
+  ]
+}
+
+    

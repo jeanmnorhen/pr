@@ -1,0 +1,7 @@
+
+# Adicione aqui quaisquer dependências Python para a sua API.
+# Exemplo:
+# Flask==2.3.2
+# requests==2.31.0
+
+    

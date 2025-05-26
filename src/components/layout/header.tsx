@@ -1,7 +1,8 @@
+
 "use client";
 
 import Link from 'next/link';
-import { ShieldCheck, LogOut, UserCircle, LogInIcon, UserPlus, MessageSquare } from 'lucide-react';
+import { ShieldCheck, LogOut, UserCircle, LogInIcon, UserPlus, MessageSquare, ShoppingBag } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -16,7 +17,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-card border-b border-border shadow-sm">
+    <header className="bg-card border-b border-border shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors">
           <ShieldCheck className="h-7 w-7" />
@@ -29,6 +30,11 @@ export default function Header() {
           <Button variant="ghost" size="sm" asChild>
             <Link href="/rtdb-example" className="flex items-center gap-1">
                <MessageSquare size={18} /> Chat
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/products" className="flex items-center gap-1">
+               <ShoppingBag size={18} /> Produtos
             </Link>
           </Button>
           {loading ? (
@@ -65,3 +71,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
