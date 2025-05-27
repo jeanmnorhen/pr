@@ -1,5 +1,10 @@
 
-# Adicione aqui quaisquer dependências Python para a sua API.
-# Exemplo:
-# Flask==2.3.2
-# requests==2.31.0
+Flask==3.0.0
+torch==2.2.1
+torchvision==0.17.1
+timm==0.9.12
+Pillow==10.2.0
+requests==2.31.0
+beautifulsoup4==4.12.3
+fake-useragent==1.5.1
+firebase-admin==6.5.0

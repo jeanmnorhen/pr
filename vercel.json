@@ -1,9 +1,44 @@
 
 {
+  "builds": [
+    {
+      "src": "api/identify_objects_cf.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "50mb" }
+    },
+    {
+      "src": "api/search_products_cf.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/classify_product_cf.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "next.config.ts",
+      "use": "@vercel/next"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/products",
       "destination": "/api/products.py"
+    },
+    {
+      "source": "/api/identify_objects",
+      "destination": "/api/identify_objects_cf.py"
+    },
+    {
+      "source": "/api/search_products",
+      "destination": "/api/search_products_cf.py"
+    },
+    {
+      "source": "/api/classify_product",
+      "destination": "/api/classify_product_cf.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }

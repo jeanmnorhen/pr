@@ -3,7 +3,28 @@
 import { db } from './config';
 import { ref, set, onValue, push, serverTimestamp, off, type DataSnapshot, query, orderByChild, limitToLast, update, get, child } from 'firebase/database';
 import type { User } from 'firebase/auth';
-import type { UserProfileData, ProductAd, ProductAdFormData } from '@/lib/schemas/auth-schemas';
+import type { UserProfileData, ProductAdFormData } from '@/lib/schemas/auth-schemas';
+
+// Interface para os dados básicos do produto salvos inicialmente ou vindos do scraping
+export interface ProductData {
+  nome_produto: string;
+  descricao?: string;
+  url_produto?: string;
+  url_imagem_produto: string;
+  preco?: string;
+  disponibilidade?: string;
+  nome_vendedor?: string;
+  timestamp?: number | object; // Pode ser número ou serverTimestamp
+  category?: string; // Adicionado para classificação
+  attributes?: Record<string, any>; // Adicionado para atributos
+  'data-ai-hint'?: string; // Para consistência com mock
+}
+
+// Interface para o produto completo com ID do RTDB
+export interface Product extends ProductData {
+  id: string;
+}
+
 
 export interface Message {
   id: string;
@@ -15,7 +36,8 @@ export interface Message {
 
 const MESSAGES_PATH = 'messages';
 const USERS_PATH = 'users';
-const STORE_PRODUCTS_PATH = 'storeProducts';
+const PRODUCTS_PATH = 'products'; // Novo caminho para produtos catalogados
+const STORE_PRODUCTS_PATH = 'storeProducts'; // Para anúncios específicos de lojas
 
 export async function addMessage(messageText: string, user: User | null): Promise<void> {
   if (!messageText.trim()) {
@@ -102,7 +124,6 @@ export async function ensureUserProfileExists(user: User): Promise<UserProfileDa
     await updateUserProfileData(user.uid, initialProfile);
     return initialProfile;
   }
-  // Ensure essential fields exist if profile was created partially
   const updates: Partial<UserProfileData> = {};
   if (profileData.displayName === undefined) updates.displayName = user.displayName || null;
   if (profileData.email === undefined) updates.email = user.email || null;
@@ -114,6 +135,16 @@ export async function ensureUserProfileExists(user: User): Promise<UserProfileDa
   }
   return profileData;
 }
+
+// Para salvar anúncios de produtos de lojistas
+export interface ProductAd extends ProductAdFormData {
+  id: string;
+  storeOwnerId: string;
+  storeOwnerName: string; 
+  timestamp: number | object;
+  'data-ai-hint'?: string; 
+}
+
 
 export async function addProductAd(
   userId: string,
@@ -132,7 +163,7 @@ export async function addProductAd(
       ...productData,
       storeOwnerId: userId,
       storeOwnerName: storeOwnerName,
-      timestamp: serverTimestamp() as any, // Cast to any because RTDB expects an object
+      timestamp: serverTimestamp(),
     };
     await set(newProductRef, fullProductData);
     return newProductId;
@@ -151,7 +182,7 @@ export async function getStoreProducts(storeId: string): Promise<ProductAd[]> {
       const productsList: ProductAd[] = Object.keys(productsData).map(key => ({
         id: key,
         ...productsData[key]
-      })).sort((a, b) => b.timestamp - a.timestamp); // Show newest first
+      })).sort((a, b) => (b.timestamp as number) - (a.timestamp as number)); 
       return productsList;
     }
     return [];
@@ -159,4 +190,55 @@ export async function getStoreProducts(storeId: string): Promise<ProductAd[]> {
     console.error("Error fetching store products:", error);
     return [];
   }
+}
+
+
+// Funções para o catálogo geral de produtos identificados
+export async function saveProductToDB(productData: ProductData): Promise<string> {
+  try {
+    const productsRefPath = ref(db, PRODUCTS_PATH);
+    const newProductRef = push(productsRefPath);
+    const productId = newProductRef.key;
+    if (!productId) {
+      throw new Error("Failed to generate product ID");
+    }
+    const dataToSave = { ...productData, timestamp: productData.timestamp || serverTimestamp() };
+    await set(newProductRef, dataToSave);
+    return productId;
+  } catch (error) {
+    console.error("Error saving product to Realtime Database:", error);
+    throw error;
+  }
+}
+
+export async function updateProductInDB(productId: string, dataToUpdate: Partial<ProductData>): Promise<void> {
+  try {
+    const productRefPath = ref(db, `${PRODUCTS_PATH}/${productId}`);
+    await update(productRefPath, dataToUpdate);
+  } catch (error) {
+    console.error(`Error updating product ${productId} in Realtime Database:`, error);
+    throw error;
+  }
+}
+
+export function subscribeToProducts(callback: (products: Product[]) => void, limit: number = 20): () => void {
+  const productsQuery = query(ref(db, PRODUCTS_PATH), orderByChild('timestamp'), limitToLast(limit));
+  
+  const listener = onValue(productsQuery, (snapshot: DataSnapshot) => {
+    const productsData = snapshot.val();
+    if (productsData) {
+      const productsList: Product[] = Object.keys(productsData).map(key => ({
+        id: key,
+        ...productsData[key]
+      })).sort((a, b) => (b.timestamp as number) - (a.timestamp as number)); // Mais recentes primeiro
+      callback(productsList);
+    } else {
+      callback([]);
+    }
+  }, (error) => {
+    console.error("Error subscribing to products:", error);
+    callback([]);
+  });
+
+  return () => off(productsQuery, 'value', listener);
 }
