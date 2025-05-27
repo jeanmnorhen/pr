@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShieldCheck, LogOut, UserCircle, LogInIcon, UserPlus, MessageSquare, ShoppingBag } from 'lucide-react';
+import { ShieldCheck, LogOut, UserCircle, LogInIcon, UserPlus, MessageSquare, ShoppingBag, Wrench } from 'lucide-react'; // Added Wrench
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -35,6 +35,12 @@ export default function Header() {
           <Button variant="ghost" size="sm" asChild>
             <Link href="/products" className="flex items-center gap-1">
                <ShoppingBag size={18} /> <span className="hidden xs:inline">Produtos</span>
+            </Link>
+          </Button>
+           {/* Link para a página de testes do Backend */}
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/admin/backend-tests" className="flex items-center gap-1">
+              <Wrench size={18} /> <span className="hidden xs:inline">Testes</span>
             </Link>
           </Button>
           {loading ? (
@@ -71,3 +77,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
